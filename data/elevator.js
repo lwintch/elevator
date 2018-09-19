@@ -1,3 +1,5 @@
+import { ELEVATOR_SERVICE_CALL_PREFIX } from "../services/event-manager";
+
 
 export class Elevator {
     id = 0;
@@ -27,6 +29,8 @@ export class Elevator {
         // todo: warn on non natural number for id and/or position.
         // todo: warn on empty value for name.
     }
+
+    makeTopicName(){ return `${ELEVATOR_SERVICE_CALL_PREFIX}-${this.id}`; }
 
     getId(){ return this.id; }
 

@@ -13,6 +13,7 @@ export class PositionController {
 
     elevators = {};
     floors = {};
+    subscriptions = {};
 
     // will be iterating over floors to get service calls.  this isn't
     //  as efficient as it could be, but is less prone to calculation
@@ -69,9 +70,11 @@ export class PositionController {
 
         // add subscription for call requests
         const topicName = floor.makeTopicName();
+        const controller = this; // could use 'self', but it is a keyword in es6+.
 
-        eventManager.subscribe(topicName, );
-
+        controller.subscriptions[topicName] = eventManager.subscribe(topicName, ()=>{
+            controller.serviceFloor(floor);
+        });
     }
 
     removeFloorFromService(floor){
@@ -79,6 +82,8 @@ export class PositionController {
 
         this.operationalRecord.serviceableFloors.has(floor.getId()) &&
         this.operationalRecord.serviceableFloors.delete(floor.getId()); // could use serviceableFloors['delete'] if there is a need for safety (eg IE).
+
+        this.subscriptions[floor.makeTopicName()].remove();
     }
 
     addElevatorToService(elevator){
@@ -87,6 +92,13 @@ export class PositionController {
         !elevator.isInRepairMode() && 
         !this.operationalRecord.serviceableElevators.has(elevator.getId()) &&
         this.operationalRecord.serviceableElevators.add(elevator.getId());
+
+        const topicName = elevator.makeTopicName();
+        const controller = this;
+
+        this.subscriptions[topicName] = eventManager.subscribe(topicName, ()=>{
+            controller.removeElevatorFromService(elevator);
+        });
     }
 
     removeElevatorFromService(elevator){
@@ -94,7 +106,50 @@ export class PositionController {
         
         this.operationalRecord.serviceableElevators.has(elevator.getId()) &&
         this.operationalRecord.serviceableElevators.delete(elevator.getId());
+
+        this.subscriptions[elevator.makeTopicName()].remove();
     }
+
+    serviceFloor(floor){
+        /*
+         * There are a few algorithms that make sense for this.  The best one 
+         *   would be a weighted graph built with a breadth then depth search.
+         * Luckily there is a relationship between the each floor and the number
+         *   of elevators in service.  This algorithm can get tricky, but is easy
+         *   enough if you can find a max limit between elevators with respect to 
+         *   the calling floor.
+         * To find the elevators within the shortest distance:
+         *   - Find all working elevators currently unoccupied, starting from the 
+         *       origin of the service call, alternating between above and below.
+         *   - Could be asynchronous.  This is a simple search for the most likely
+         *     elevator to service.  A backup could be found in case the elevator 
+         *     chosen breaks or is on trip 99.  Could also pre filter elevators that
+         *     are on trip 99.
+         *   
+         * Set and publish the necessary arguments and events that describe the floor
+         *   is being serviced and the elevator is in transit.
+         * 
+         * On doors open for the target floor, remove events and reset that elevator 
+         *   and floor to an initial state.
+         *   Remove from position map and add a service record.
+         */
+    }
+
+    serviceElevator(elevator){
+        /*
+         * Set the elevator to inRepairMode and take it out of rotation.
+         * This should probably be a managed event that is broadcast from the
+         *   elevator on trip 100.
+         * 
+         * Remove from position map and add a service record.
+         */
+    }
+
+    resetElevator(elevator){
+        // add elevator to service again.
+
+    }
+
 
 
 
