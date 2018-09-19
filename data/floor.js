@@ -1,3 +1,5 @@
+import eventManager, { FLOOR_CALL_REQUEST_PREFIX } from '../services/event-manager';
+
 
 export class Floor {
     id = 0;
@@ -25,6 +27,16 @@ export class Floor {
 
     hasActiveCallRequest(){ return this.hasActiveCallRequest; }
     setHasActiveCallRequest(hasActiveCallRequest){ this.hasActiveCallRequest = hasActiveCallRequest; }
+
+    makeTopicName(){
+        return `${FLOOR_CALL_REQUEST_PREFIX}-${this.id}`;
+    }
+
+    makeCallRequest(){
+        this.hasActiveCallRequest = true;
+
+        eventManager.publish(this.makeTopicName(), true);
+    }
 
 
     // not implementing setters for other params to follow a simple immutability pattern.

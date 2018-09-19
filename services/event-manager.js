@@ -1,3 +1,6 @@
+export const FLOOR_CALL_REQUEST_PREFIX = 'FLOOR_CALL_REQUEST';
+export const ELEVATOR_SERVICE_CALL_PREFIX = 'ELEVATOR_SERVICE_CALL';
+
 function topicExists(topics = {}, topic = ''){
     // note: topic is a possible meaningless value, but it is operable.  
     //  we should throw exceptions when we want to and avoid data typing

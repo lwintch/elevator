@@ -11,11 +11,16 @@ export class PositionController {
     // could be an array.
     // building = null;
 
+    elevators = {};
     floors = {};
+
+    // will be iterating over floors to get service calls.  this isn't
+    //  as efficient as it could be, but is less prone to calculation
+    //  errors and race conditions.
 
     // could be indexed by building id => floors, elevator
     operationalRecord = {
-        serviceableFloors: new Set(), 
+        serviceableFloors: new Set(),  // ensure uniqueness.  there are a bunch of ways to do that.
         serviceableElevators: new Set(),
     }; 
 
@@ -61,13 +66,34 @@ export class PositionController {
         floor.isActive() && 
         !this.operationalRecord.serviceableFloors.has(floor.getId()) &&
         this.operationalRecord.serviceableFloors.add(floor.getId());
+
+        // add subscription for call requests
+        const topicName = floor.makeTopicName();
+
+        eventManager.subscribe(topicName, );
+
     }
 
     removeFloorFromService(floor){
         floor.setIsActive(false);
 
-        floor.operationalRecord.serviceableFloors.has(floor.getId()) &&
-        floor.operationalRecord.serviceableFloors.delete(floor.getId()); // could use serviceableFloors['delete'] if there is a need for safety (eg IE).
+        this.operationalRecord.serviceableFloors.has(floor.getId()) &&
+        this.operationalRecord.serviceableFloors.delete(floor.getId()); // could use serviceableFloors['delete'] if there is a need for safety (eg IE).
+    }
+
+    addElevatorToService(elevator){
+        this.elevators[elevator.getId()] = elevator;
+
+        !elevator.isInRepairMode() && 
+        !this.operationalRecord.serviceableElevators.has(elevator.getId()) &&
+        this.operationalRecord.serviceableElevators.add(elevator.getId());
+    }
+
+    removeElevatorFromService(elevator){
+        elevator.setIsInRepairMode(true);
+        
+        this.operationalRecord.serviceableElevators.has(elevator.getId()) &&
+        this.operationalRecord.serviceableElevators.delete(elevator.getId());
     }
 
 

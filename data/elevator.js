@@ -5,6 +5,7 @@ export class Elevator {
     name = 0;
     areDoorsOpen = false;
     isInRepairMode = false;
+    tripsMade = 0;
 
     constructor({ id = 0, name = '', position = 0 }){
         this.id = id;
@@ -39,6 +40,9 @@ export class Elevator {
 
     isInRepairMode(){ return this.isInRepairMode; }
     setIsInRepairMode(repairMode = false){ this.isInRepairMode = repairMode; }
+
+    getTripsMade(){ return this.tripsMade; }
+    addTrip(){ this.tripsMade++; }
     
     // Not adding a setter for name nor id, to use an immutability pattern.
     //  Possible downside is that history for the elevator could be lost or
