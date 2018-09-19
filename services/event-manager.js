@@ -7,6 +7,8 @@ function topicExists(topics = {}, topic = ''){
 
 }
 
+// coding style - lowercase 'eventManager' as it is already instantiated (iife).
+// note: there will only be one instance of these in the application, intentionally.
 export const eventManager = (function(){
     let topics = {};
 
@@ -38,12 +40,30 @@ export const eventManager = (function(){
                         (console.error || console.log)(`Unable to delete subscription to topic ${topic}`);
 
                         return false;
-
                     }
                 }
             }
+        },
+        publish: (topic, data) => {
+            if (!topicExists(topics, topic)){
+                // todo: add a logger.
+                (console.error || console.log)(`Unable to call listener for subscription to topic ${topic}. It does not exist!`);
+
+                return;
+            }
+
+            // unnecessary return, but this may be more readable as an early return was used above.
+            // the use of 'apply' is likely not necessary.  I only use in case I'm working with
+            //   others who really like to use the 'this' keyword.  Professional courtesy?
+            //   In this case, this would reference the data value given, and would also be passed as
+            //     the first argument to the listener called.  It supports multiple coding styles for
+            //     when others use my code.
+            return topics[topic].forEach( listener => listener.apply(data || null, [data]));
+
         }
 
     }
 
 })();
+
+export default eventManager;
