@@ -111,6 +111,12 @@ export class PositionController {
     }
 
     serviceFloor(floor){
+        // todo: warn and return if the floor requested is < 1 or > top floor.
+        // todo: after finding the elevator to move, ensure doors are closed 
+        //   and publish that it is moving.
+        // todo: after the elevator reaches this floor, open the doors.
+
+
         /*
          * There are a few algorithms that make sense for this.  The best one 
          *   would be a weighted graph built with a breadth then depth search.
@@ -146,11 +152,51 @@ export class PositionController {
     }
 
     resetElevator(elevator){
-        // add elevator to service again.
-
+        // add elevator to service.
     }
 
+    resetFloor(floor){
+        // add floor to service.
+    }
 
+    // closest serviceable elevator
+    findClosesElevatorToFloor(floor){
+        let choices = this.findElevatorsByFloor(floor);
+        let testHigherFloor = true; // really position
+        let floorModifierValue = 1;
+        let timesModifierTried = 1; // these 3 variables (above) are begging for a refactor.
+        let cap = Object.keys(this.floors).length;
+        let i = 0;
+
+        while (!choices && i < cap){
+            if (timesModifierTried > 1){
+                timesModifierTried = 1;
+                floorModifierValue++;
+                testHigherFloor = !testHigherFloor;
+            }
+
+            if (testHigherFloor){
+                choices = this.findElevatorsByFloor(floor + floorModifierValue);
+            } else {
+                choices = this.findElevatorsByFloor(floor - floorModifierValue);
+            }
+
+            timesModifierTried++; // could use i % 2? risky, but simpler.
+            i++;
+        }
+
+        return choices;
+
+
+        // This is untested, but the idea is to spiral query each floor for a list
+        //  of available elevators beginning at the floor where the call request
+        //  was made.  This was the fastest simple algorithm I could think of within
+        //  the time constraints.
+    }
+
+    findElevatorsByFloor(floor){
+        return this.positions.byFloor[floor.getId()];
+    }
 
 
 }
