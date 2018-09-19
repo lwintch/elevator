@@ -8,14 +8,40 @@ import eventManager from './event-manager';
  *   multiple buildings easily.
  */
 export class PositionController {
-    building = null; // could be an array.
-    positions = {}; // could be indexed by building id => floors, elevator
+    // could be an array.
+    // building = null;
+
+    floors = {};
+
+    // could be indexed by building id => floors, elevator
+    operationalRecord = {
+        serviceableFloors: new Set(), 
+        serviceableElevators: new Set(),
+    }; 
+
+    // could be an array where the indexes are keys, but i like meaningful keys.
+    positions = {
+        byElevator: {},
+        byFloor: {}        
+    };
+
+    serviceRecords: [];  // todo: future feature
 
     // a dual linked list would be good for the position map to provide a
     //   lookup by floor or by elevator.  it would answer the following 
     //   questions:
     //      1) Where is elevator with id 'x'.
     //      2) Which elevator is servicing floor 'y'.
+
+
+    /*  Rules of operation
+     *  
+     *  * lowest floor is 1.
+     *  * highest floor is the upper limit. (no booster rockets or otherwise flying boxes for elevators).
+     *  * every elevator will publish a move event upon moving.
+     *  * every elevator will publish a door action event upon open/close of doors.
+     * 
+     */
 
 
     constructor(){
@@ -28,6 +54,22 @@ export class PositionController {
 
     getBuilding(){ return this.building; }
     setBuilding(building){ this.building = building; }
+
+    addFloorToService(floor){
+        this.floors[floor.getId()] = floor;
+
+        floor.isActive() && 
+        !this.operationalRecord.serviceableFloors.has(floor.getId()) &&
+        this.operationalRecord.serviceableFloors.add(floor.getId());
+    }
+
+    removeFloorFromService(floor){
+        floor.setIsActive(false);
+
+        floor.operationalRecord.serviceableFloors.has(floor.getId()) &&
+        floor.operationalRecord.serviceableFloors.delete(floor.getId()); // could use serviceableFloors['delete'] if there is a need for safety (eg IE).
+    }
+
 
 
 }

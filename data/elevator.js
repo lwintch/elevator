@@ -3,16 +3,29 @@ export class Elevator {
     id = 0;
     position = 0;
     name = 0;
+    areDoorsOpen = false;
+    isInRepairMode = false;
 
     constructor({ id = 0, name = '', position = 0 }){
         this.id = id;
         this.name = name;
         this.position = position;
 
+        // assumption that the doors will never start open.  may not
+        //  be a good one, in case we want to instantiate a broken
+        //  elevator?
+
+        // assumption that the elevator doesn't really care that it
+        //  is in transit (unless we need an emergency system).  the
+        //  position controller can determine if the elevator is in
+        //  transit by the doors being closed (except in case of mal-
+        //  function) and a call request being made that has not been
+        //  fulfilled.
+
+
         // todo: warn on non natural number for id and/or position.
         // todo: warn on empty value for name.
     }
-
 
     getId(){ return this.id; }
 
@@ -20,6 +33,12 @@ export class Elevator {
     setPosition(position){ this.position = position; }
 
     getName() { return this.name; }
+
+    areDoorsOpen(){ return this.areDoorsOpen; }
+    setAreDoorsOpen(areDoorsOpen = false){ this.areDoorsOpen = areDoorsOpen; }
+
+    isInRepairMode(){ return this.isInRepairMode; }
+    setIsInRepairMode(repairMode = false){ this.isInRepairMode = repairMode; }
     
     // Not adding a setter for name nor id, to use an immutability pattern.
     //  Possible downside is that history for the elevator could be lost or
